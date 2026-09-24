@@ -1,0 +1,1916 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 5,
+  "metadata": {
+    "kernelspec": {
+      "display_name": "IJulia 1.9.3",
+      "language": "julia",
+      "name": "ijulia-1.9"
+    },
+    "language_info": {
+      "file_extension": ".jl",
+      "name": "julia",
+      "version": "1.9.3"
+    },
+    "engee": {}
+  },
+  "cells": [
+    {
+      "id": "47aa4508",
+      "cell_type": "markdown",
+      "source": [
+        "# Инженерные данные и сигналы"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "01b37c58",
+      "cell_type": "markdown",
+      "source": [
+        "## Импорт библиотек"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "8cbfd536",
+      "cell_type": "markdown",
+      "source": [
+        "Подключим библиотеки для работы с данными, сигналами и визуализацией. StatsBase и Statistics обеспечат статистические функции. CSV, XLSX и MAT позволят читать данные из соответствующих форматов. WAV - для аудиофайлов. Images - для загрузки изображений. DSP и FFTW - для спектрального анализа."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "7fd5e9a1",
+      "cell_type": "code",
+      "source": [
+        "Pkg.add([\"Statistics\", \"StatsBase\", \"StatsPlots\", \"CSV\", \"DataFrames\", \"Dates\", \"XLSX\", \"MAT\", \"WAV\", \"Images\", \"FileIO\", \"DSP\", \"FFTW\", \"DelimitedFiles\"])"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 900
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "d0373361",
+      "cell_type": "code",
+      "source": [
+        "using Statistics, StatsBase, StatsPlots\nusing CSV, DataFrames, Dates, XLSX, MAT, WAV, Images, FileIO\nusing DSP, FFTW, DelimitedFiles\ninclude(\"media_player.jl\")"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": " ",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "47d1ac3a",
+      "cell_type": "markdown",
+      "source": [
+        "## Чтение CSV-файла с данными энергопотребления"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "7aa4aa1e",
+      "cell_type": "markdown",
+      "source": [
+        "Начнём с самого распространённого формата инженерных данных - CSV. Прочитаем файл с показателями энергопотребления сталелитейного предприятия. Функция CSV.read возвращает DataFrame - табличную структуру, где столбцы доступны по именам. Сразу выведем размерность, чтобы понять масштаб данных."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "f6104c28",
+      "cell_type": "code",
+      "source": [
+        "df_energy = CSV.read(\"Steel_Industry.csv\", DataFrame)\nprintln(\"Размерность данных: \", size(df_energy))\nprintln(\"Имена столбцов: \", names(df_energy))"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "0eb5154a",
+      "cell_type": "markdown",
+      "source": [
+        "## Первичный осмотр данных"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "9297c847",
+      "cell_type": "markdown",
+      "source": [
+        "Первое правило инженера при получении данных - посмотреть на них глазами. Выведем первые и последние строки, типы столбцов. Это поможет обнаружить проблемы: пропуски, некорректные типы, неожиданные значения."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "605504e0",
+      "cell_type": "code",
+      "source": [
+        "println(\"Первые 10 строк:\")\nfirst(df_energy, 10)"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "aa4a0f81",
+      "cell_type": "code",
+      "source": [
+        "println(\"\\nТипы данных столбцов:\")\n[names(df_energy) eltype.(eachcol(df_energy))]"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "876e781d",
+      "cell_type": "markdown",
+      "source": [
+        "## Преобразование даты и времени"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "646d9cb4",
+      "cell_type": "markdown",
+      "source": [
+        "В инженерных данных временные метки часто хранятся как строки. Преобразуем столбец date в формат DateTime. После преобразования можем вычислить диапазон дат и средний шаг измерений. Добавим новый столбец DateTime в DataFrame."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "9b6fc819",
+      "cell_type": "code",
+      "source": [
+        "df_energy.DateTime = DateTime.(df_energy.date, dateformat\"dd/mm/yyyy HH:MM\")\nprintln(\"Диапазон: \", minimum(df_energy.DateTime), \" — \", maximum(df_energy.DateTime))\n\nstep_sec = mean([Dates.value(dt)/1000 for dt in diff(df_energy.DateTime)])\nprintln(\"Средний шаг: \", round(step_sec, digits=2), \" сек\")"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "acf29f83",
+      "cell_type": "markdown",
+      "source": [
+        "## Визуализация временного ряда"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "2aa44aa5",
+      "cell_type": "markdown",
+      "source": [
+        "График - лучший способ понять поведение системы. Построим график энергопотребления за весь период. По оси X - время, по Y - киловатт-часы. Видим цикличность и выбросы."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "ae30c96f",
+      "cell_type": "code",
+      "source": [
+        "plot(df_energy.DateTime, df_energy.Usage_kWh,\n     xlabel=\"Время\", ylabel=\"кВт·ч\",\n     title=\"Энергопотребление\",\n     linewidth=0.5, legend=false, size=(900, 350))"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "17878e6e",
+      "cell_type": "markdown",
+      "source": [
+        "## Чтение данных из MAT-файла"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "05252c98",
+      "cell_type": "markdown",
+      "source": [
+        "Формат MATLAB (.mat) - стандарт в инженерной практике. В нём могут храниться сигналы, матрицы, структуры. Прочитаем файл с акустическими сигналами подшипника. Функция matread возвращает словарь, где ключи - имена переменных, значения - матрицы."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "1a75c497",
+      "cell_type": "code",
+      "source": [
+        "подшипник = matread(\"Bearing.mat\")\nprintln(\"Ключи в файле: \", keys(подшипник))\nprintln(\"Размер сигнала normal: \", size(подшипник[\"normal\"]))"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "17f5384d",
+      "cell_type": "markdown",
+      "source": [
+        "## Преобразование MAT-данных в вектор"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "5068802f",
+      "cell_type": "markdown",
+      "source": [
+        "Данные из MAT-файла хранятся как матрицы размером 1×N. Преобразуем их в одномерные векторы с помощью функции vec. Теперь это обычный массив чисел Julia, с которым можно выполнять математические операции."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "b462521c",
+      "cell_type": "code",
+      "source": [
+        "норма = vec(подшипник[\"normal\"])\nролик = vec(подшипник[\"roller\"])\nprintln(\"Тип данных: \", typeof(норма))\nprintln(\"Длина сигнала: \", length(норма))\nprintln(\"\\nПервые 5 отсчётов нормального сигнала: \\n\", норма[1:5])"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "36d5c388",
+      "cell_type": "markdown",
+      "source": [
+        "## Чтение аудиофайла WAV"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "5a5f62f8",
+      "cell_type": "markdown",
+      "source": [
+        "Акустические данные часто хранятся в аудиоформатах. Функция wavread возвращает массив отсчётов и частоту дискретизации. В отличие от MAT, здесь данные сразу представлены как вектор."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "78a0235d",
+      "cell_type": "code",
+      "source": [
+        "сигнал_wav, fs_wav = WAV.wavread(\"Подшипник_1.wav\")\nprintln(\"Частота дискретизации: \", fs_wav, \" Гц\")\nprintln(\"Длительность: \", round(length(сигнал_wav)/fs_wav, digits=2), \" сек\")"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "3a1132b2",
+      "cell_type": "markdown",
+      "source": [
+        "## Воспроизведение аудиофайла в Engee"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "96e96944",
+      "cell_type": "markdown",
+      "source": [
+        "Воспроизведём акустический сигнал подшипника с помощью встроенного аудиоплеера."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "f23464fa",
+      "cell_type": "code",
+      "source": [
+        "media_player(\"$(@__DIR__)/Подшипник_1.wav\", mode=\"audio\")"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "dd639a4b",
+      "cell_type": "markdown",
+      "source": [
+        "## Спектральный анализ через FFT"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "103da901",
+      "cell_type": "markdown",
+      "source": [
+        "Быстрое преобразование Фурье переводит сигнал из временной области в частотную. Это ключевой инструмент анализа вибраций и акустики. Центрируем сигнал, применяем FFT, берём модуль для амплитудного спектра. Построим только первую половину (частоты от 0 до Найквиста)."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "ab418dad",
+      "cell_type": "code",
+      "source": [
+        "сигнал = норма[1:4000] .- mean(норма[1:4000])\nспектр = abs.(fft(сигнал))\nN = length(сигнал)\nчастоты = (0:N÷2-1) * 10000 / N\n\nplot(частоты, спектр[1:N÷2],\n     xlabel=\"Частота, Гц\", ylabel=\"Амплитуда\",\n     title=\"Акустический спектр подшипника\",\n     linewidth=1, legend=false, size=(800, 350))"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 1.7142857313156128
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "18a57d05",
+      "cell_type": "markdown",
+      "source": [
+        "## Сжатие данных через FFT"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "9644e0dc",
+      "cell_type": "markdown",
+      "source": [
+        "Одна из практических задач - сжатие данных. Посмотрим на спектр и определим, в каком диапазоне сосредоточена основная энергия сигнала. Затем оставим только несколько ключевых частотных компонент - это и будет сжатое представление. Вместо 4000 отсчётов сигнала можно хранить 20 чисел."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "64916319",
+      "cell_type": "code",
+      "source": [
+        "амплитуды = спектр[1:N÷2]\nэнергия_общая = sum(амплитуды.^2)\nкум_энергия = cumsum(амплитуды.^2) / энергия_общая\n\nplot(частоты, кум_энергия,\n     xlabel=\"Частота, Гц\", ylabel=\"Накопленная энергия\",\n     title=\"Кумулятивная энергия спектра\",\n     linewidth=2, legend=false, size=(800, 350))\nhline!([0.95], linestyle=:dash, label=\"95% энергии\")"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "6e986889",
+      "cell_type": "markdown",
+      "source": [
+        "## Выбор информативных частотных полос"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "0a534f84",
+      "cell_type": "markdown",
+      "source": [
+        "Разобьём частотный диапазон на 20 равных полос и вычислим среднюю амплитуду в каждой. Это даст компактное представление сигнала - 20 чисел, которые можно хранить в таблице."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "22196248",
+      "cell_type": "code",
+      "source": [
+        "кол_полос = 20\nполосы = range(0, 5000, length=кол_полос+1)\nпризнаки_fft = zeros(кол_полос)\n\nfor i in 1:кол_полос\n    маска = (частоты .>= полосы[i]) .& (частоты .< полосы[i+1])\n    if sum(маска) > 0\n        признаки_fft[i] = mean(амплитуды[маска])\n    end\nend\n\nbar(1:кол_полос, признаки_fft,\n    xlabel=\"Номер полосы\", ylabel=\"Средняя амплитуда\",\n    title=\"Сжатое представление сигнала (20 полос)\",\n    legend=false, size=(700, 300))"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "a7969f4c",
+      "cell_type": "markdown",
+      "source": [
+        "## Чтение изображения"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "a5ed4653",
+      "cell_type": "markdown",
+      "source": [
+        "Прочитаем файл с изображением. Отобразим тип изображения и его размер."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "ea737d83",
+      "cell_type": "code",
+      "source": [
+        "изобр = Images.load(\"image.png\")\nprintln(\"Тип изображения: \", typeof(изобр))\nprintln(\"Размер: \", size(изобр))"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "41d0da6a",
+      "cell_type": "markdown",
+      "source": [
+        "Отобразим изображение."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "dd9fddfb",
+      "cell_type": "code",
+      "source": [
+        "изобр"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 185.97401428222656
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "71862797",
+      "cell_type": "markdown",
+      "source": [
+        "## Преобразование изображения в числовую матрицу"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "55e7bdb1",
+      "cell_type": "markdown",
+      "source": [
+        "Преобразуем изображение в матрицу чисел."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "0d890d2b",
+      "cell_type": "code",
+      "source": [
+        "каналы = Float64.(Images.channelview(изобр))\nканалы = permutedims(каналы, (2, 3, 1))"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 1098.7012939453125
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "92060484",
+      "cell_type": "markdown",
+      "source": [
+        "Изображение представлено трёхмерным массивом 954×923×4. Первые два измерения это 954 строки и 923 столбца пикселей. Третье измерение — четыре цветовых канала: красный, зелёный, синий и альфа-канал прозрачности. Каждое значение находится в диапазоне от 0 до 1, где для цветовых каналов 0 означает отсутствие цвета, 1 — максимальную интенсивность, а для альфа-канала 1 означает полную непрозрачность."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "f38aa619",
+      "cell_type": "markdown",
+      "source": [
+        "## Чтение текстового файла с данными"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "2a338e8e",
+      "cell_type": "markdown",
+      "source": [
+        "Текстовые файлы - простейший формат хранения. Прочитаем txt-файл с числовыми данными о температуре окружающей среды, определим количество значений, диапазон, и выведем первые 5 значений. "
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "a8c48c0e",
+      "cell_type": "code",
+      "source": [
+        "температура = vec(readdlm(\"температура.txt\"))\nprintln(\"Количество значений: \", length(температура))\nprintln(\"Диапазон: \", minimum(температура), \" ... \", maximum(температура), \" °C\")\nprintln(\"Первые 5 значений: \", температура[1:5])"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "498647fc",
+      "cell_type": "markdown",
+      "source": [
+        "## Чтение данных из Excel"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "a2dab2e5",
+      "cell_type": "markdown",
+      "source": [
+        "Excel-файлы широко распространены в промышленности. Аналогично прочитаем xlsx-файл c данными о влажности окружающей среды."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "71cc7792",
+      "cell_type": "code",
+      "source": [
+        "xlsx_file = XLSX.readxlsx(\"влажность.xlsx\")\nлист = xlsx_file[1]\nвлажность = Float64.(лист[\"A\"][2:end])\nprintln(\"Количество значений: \", length(влажность),)\nprintln(\"Диапазон: \", minimum(влажность), \" ... \", maximum(влажность), \" %\")\nprintln(\"Первые 5 значений: \", влажность[1:5])"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "179bd1a7",
+      "cell_type": "markdown",
+      "source": [
+        "## Преобразование набора данных"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "c879c8ea",
+      "cell_type": "markdown",
+      "source": [
+        "Преобразуем набор данных, когда часть исходных столбцов не нужна, но требуется добавить новые данные из внешних источников. Удалим столбцы NSM, WeekStatus, Day\\_of\\_week и Load\\_Type, а затем добавим столбцы температуры и влажности, загруженные ранее."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "d274713f",
+      "cell_type": "code",
+      "source": [
+        "select!(df_energy, Not([:NSM, :WeekStatus, :Day_of_week, :Load_Type]))\nprintln(\"Столбцы после удаления: \\n\\n\", names(df_energy))"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "2b6de8ee",
+      "cell_type": "markdown",
+      "source": [
+        "Добавим ранее загруженные переменные температуры и влажности как новые столбцы. Количество строк должно совпадать."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "e7ae24b4",
+      "cell_type": "code",
+      "source": [
+        "df_energy.Temperature_C = температура\ndf_energy.Humidity_Pct = влажность\n"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "1f88f031",
+      "cell_type": "markdown",
+      "source": [
+        "Отобразим первые 10 строк обновлённого набора данных."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "1f0a68a8",
+      "cell_type": "code",
+      "source": [
+        "println(\"Первые 10 строк:\")\nfirst(df_energy, 10)"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "007abd0a",
+      "cell_type": "markdown",
+      "source": [
+        "Сохраним преобразованный набор данных в новый CSV-файл. Исходный файл `Steel_Industry.csv` остаётся без изменений - все преобразования сохранены в новом файле `Сталелитейные_данные.csv`."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "e4912491",
+      "cell_type": "code",
+      "source": [
+        "CSV.write(\"Сталелитейные_данные.csv\", df_energy)"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "8258cb20",
+      "cell_type": "markdown",
+      "source": [
+        "## Преобразование MAT-файла"
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": true,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "a73087cb",
+      "cell_type": "markdown",
+      "source": [
+        "Структура данных в MAT-файле также может быть представлена по-разному. Предположим, нам поступило 4 файла с данными подшипников с испытательного стенда:\n\n* H\\_1\\_0.mat – полностью исправный подшипник;\n* B\\_11\\_1.mat – неисправность роликового элемента;\n* I\\_1\\_1.mat – неисправность внутреннего кольца;\n* O\\_6\\_1.mat – неисправность внешнего кольца.\n\nНо для модели анализа данных требуется иная структура – один MAT-файл с четырьмя ключами \"normal\", \"roller\", \"inner\", \"outer\", где:\n\nnormal – полностью исправный подшипник;\n\nroller – неисправность роликового элемента;\n\ninner – неисправность внутреннего кольца;\n\nouter – неисправность внешнего кольца.\n\nЗагрузим первый файл."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "90cb5cbc",
+      "cell_type": "code",
+      "source": [
+        "норм_тест = matread(\"H_1_0.mat\")"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "6175e57d",
+      "cell_type": "markdown",
+      "source": [
+        "Данный файл имеет иную структуру данных, отличающуюся от требуемой. Отобразим данные."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "21c97e32",
+      "cell_type": "code",
+      "source": [
+        "норм_тест = норм_тест[\"H_1_0\"]"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "7bc15374",
+      "cell_type": "markdown",
+      "source": [
+        "Файл имеет один ключ `\"H_1_0`, данные в котором является матрицей. Нам известно, что акустические данные расположены во втором столбце. Другие данные нам не нужны. Выполним извлечение этих данных."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "b05d23dc",
+      "cell_type": "code",
+      "source": [
+        "норм_тест = норм_тест[:,2]"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "9a076514",
+      "cell_type": "markdown",
+      "source": [
+        "Откроем остальные MAT-файлы."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "fabac64f",
+      "cell_type": "code",
+      "source": [
+        "ролик_тест = matread(\"B_11_1.mat\")\nвнут_тест = matread(\"I_1_1.mat\")\nвнеш_тест = matread(\"O_6_1.mat\")"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "904e4380",
+      "cell_type": "markdown",
+      "source": [
+        "Выполним извлечение матриц."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "1c18fc95",
+      "cell_type": "code",
+      "source": [
+        "ролик_тест = ролик_тест[\"B_11_1\"]\nвнут_тест = внут_тест[\"I_1_1\"]\nвнеш_тест = внеш_тест[\"O_6_1\"]"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "5e7a45dd",
+      "cell_type": "markdown",
+      "source": [
+        "Далее аналогично выполним извлечение второго столбца из каждой матрицы."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "caae42d9",
+      "cell_type": "code",
+      "source": [
+        "ролик_тест = ролик_тест[:,2]\nвнут_тест = внут_тест[:,2]\nвнеш_тест = внеш_тест[:,2]"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "a14ac24c",
+      "cell_type": "markdown",
+      "source": [
+        "Теперь у нас есть четыре вектора с акустическими данными: `норм_тест ролик_тест, внут_тест, внеш_тест`. Их необходимо собрать в один MAT-файл обозначенной ранее структуры. Создадим словарь с нужными ключами."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "ffec1640",
+      "cell_type": "code",
+      "source": [
+        "данные = Dict(\n    \"normal\" => норм_тест,\n    \"roller\" => ролик_тест,\n    \"inner\"  => внут_тест,\n    \"outer\"  => внеш_тест)"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "aa71a0c1",
+      "cell_type": "markdown",
+      "source": [
+        "Сохраним эти данные в новый MAT-файл."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "e66d06ec",
+      "cell_type": "code",
+      "source": [
+        "matwrite(\"Подшипник_тест.mat\", данные)"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "4605234e",
+      "cell_type": "markdown",
+      "source": [
+        "Прочитаем созданный файл."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    },
+    {
+      "id": "1c675292",
+      "cell_type": "code",
+      "source": [
+        "matread(\"Подшипник_тест.mat\")"
+      ],
+      "execution_count": 0,
+      "outputs": [],
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false,
+          "outputInfo": {
+            "isExpanded": false,
+            "scrollTop": 0
+          },
+          "maskInfo": {
+            "isMaskVisible": true,
+            "isEditorVisible": true,
+            "isAutoplayActive": false
+          }
+        }
+      }
+    },
+    {
+      "id": "e494e42d",
+      "cell_type": "markdown",
+      "source": [
+        "Структура созданного файла соответствуем требуемой. Данные готовы для дальнейшего использования."
+      ],
+      "attachments": {},
+      "metadata": {
+        "name": "Название секции",
+        "engee": {
+          "isDisplay": true,
+          "isParagraph": false,
+          "isClosedParagraph": false,
+          "amountHideCellsInside": 0,
+          "codeOutputView": "col",
+          "codeOutputHidden": false
+        }
+      }
+    }
+  ]
+}
